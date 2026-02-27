@@ -412,7 +412,7 @@ export default function Products() {
                             {products.map((item) => (
                                 <tr
                                     key={item.id}
-                                    className="hover:bg-slate-50 transition"
+                                    className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition"
                                 >
                                     <td className="px-6 py-4 font-mono text-blue-600 font-semibold whitespace-nowrap">
                                         {item.item_code}

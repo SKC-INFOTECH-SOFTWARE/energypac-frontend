@@ -345,7 +345,7 @@ const QuotationComparison = () => {
 
                                 {/* ITEMS ROWS */}
                                 {products.map((product) => (
-                                    <tr key={product.code} className="hover:bg-slate-50/50">
+                                    <tr key={product.code} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   ">
                                         {/* Sticky Columns for Product Name */}
                                         <td className="sticky left-0 bg-white z-20 px-4 py-3 border-r border-slate-400 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] align-top">
                                             <div className="font-medium text-slate-800">{product.name}</div>

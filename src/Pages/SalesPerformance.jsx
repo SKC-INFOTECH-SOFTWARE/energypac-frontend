@@ -142,7 +142,7 @@ const SalesPerformance = () => {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-50 text-slate-600 uppercase text-xs font-bold tracking-wider">
+                                    <tr className="odd:bg-slate-100 even:bg-white hover:bg-slate-200  text-slate-600 uppercase text-xs font-bold tracking-wider ">
                                         <th className="px-6 py-4">Sales Rep</th>
                                         <th className="px-6 py-4 text-center">Quotations</th>
                                         <th className="px-6 py-4 text-right">Total Value</th>
@@ -155,7 +155,7 @@ const SalesPerformance = () => {
                                 <tbody className="divide-y divide-slate-100">
                                     {performanceData.user_performance?.length > 0 ? (
                                         performanceData.user_performance.map((user) => (
-                                            <tr key={user.user_id} className="hover:bg-slate-50/50 transition-colors">
+                                            <tr key={user.user_id} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition-colors">
                                                 <td className="px-6 py-4 font-medium text-slate-800">
                                                     {user.user_name}
                                                 </td>

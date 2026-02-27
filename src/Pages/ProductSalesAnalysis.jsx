@@ -175,7 +175,7 @@ const ProductSalesAnalysis = () => {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-50 text-slate-600 uppercase text-xs font-bold tracking-wider">
+                                    <tr className="odd:bg-slate-100 even:bg-white hover:bg-slate-200  text-slate-600 uppercase text-xs font-bold tracking-wider ">
                                         <th className="px-6 py-4">Item Code</th>
                                         <th className="px-6 py-4">Item Name</th>
                                         <th className="px-6 py-4 text-center">Quotations</th>
@@ -188,7 +188,7 @@ const ProductSalesAnalysis = () => {
                                 <tbody className="divide-y divide-slate-100">
                                     {analysisData.all_products?.length > 0 ? (
                                         analysisData.all_products.map((item, idx) => (
-                                            <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                                            <tr key={idx} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition-colors">
                                                 <td className="px-6 py-4 font-mono text-xs text-slate-500">
                                                     {item.item_code}
                                                 </td>

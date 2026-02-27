@@ -118,7 +118,7 @@ const VendorQuotationModal = ({ open, onClose, onSuccess, requisitionId, vendorI
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {items.map((item, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/50">
+                  <tr key={idx} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   ">
                     <td className="px-4 py-3">
                       <div className="font-medium text-slate-900">
                         {item.product_name}

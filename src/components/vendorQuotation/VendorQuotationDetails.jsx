@@ -225,7 +225,7 @@ const VendorQuotationDetails = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-300 text-sm text-slate-800">
                     {items.map((item, idx) => (
-                      <tr key={item.vendor_item_id || idx} className="hover:bg-slate-50/50">
+                      <tr key={item.vendor_item_id || idx} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   ">
                         <td className="px-4 py-3">
                           <div className="font-bold text-slate-900 text-base">{item.product_name}</div>
                           <div className="text-sm text-slate-500 font-mono">{item.product_code}</div>

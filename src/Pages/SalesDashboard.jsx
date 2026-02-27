@@ -138,7 +138,7 @@ export default function SalesDashboard() {
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
                                     <thead>
-                                        <tr className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
+                                        <tr className="odd:bg-slate-100 even:bg-white hover:bg-slate-200  text-slate-500 uppercase text-[10px] font-bold tracking-widest ">
                                             <th className="px-6 py-4">Title</th>
                                             <th className="px-6 py-4">Description</th>
                                             <th className="px-6 py-4">Type</th>
@@ -237,7 +237,7 @@ function TableRow({ activity }) {
     const typeKey = activity.type || 'other';
 
     return (
-        <tr className="hover:bg-slate-50/50 transition-colors">
+        <tr className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition-colors">
             <td className="px-6 py-4">
                 <span className="font-semibold text-slate-700 text-sm tracking-wide block">
                     {activity.link ? (

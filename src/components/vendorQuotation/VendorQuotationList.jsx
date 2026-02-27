@@ -110,7 +110,7 @@ const VendorQuotationList = ({ initialViewId }) => {
                                 </tr>
                             ) : (
                                 data.map((row) => (
-                                    <tr key={row.id} className="hover:bg-slate-50/50 transition-colors group">
+                                    <tr key={row.id} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200  transition-colors group ">
                                         <td className="px-4 py-2 font-bold text-slate-900 text-base">
                                             {row.quotation_number || <span className="text-slate-500 italic">Draft</span>}
                                         </td>

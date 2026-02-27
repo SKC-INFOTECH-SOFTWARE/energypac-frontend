@@ -176,7 +176,7 @@ const VendorAssignment = () => {
                 </tr>
               ) : data.length > 0 ? (
                 data.map((row) => (
-                  <tr key={row.id} className="hover:bg-slate-50 transition">
+                  <tr key={row.id} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition">
                     <td className="px-6 py-4">
                       <span className="font-mono text-blue-600 font-semibold">
                         {row.requisition_number}

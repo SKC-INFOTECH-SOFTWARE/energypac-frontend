@@ -371,7 +371,7 @@ export default function Vendors() {
                             )}
 
                             {vendors.map((v) => (
-                                <tr key={v.id} className="hover:bg-slate-50 transition">
+                                <tr key={v.id} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition">
                                     <td className="px-6 py-4 font-mono text-blue-600 font-semibold">
                                         {v.vendor_code}
                                     </td>

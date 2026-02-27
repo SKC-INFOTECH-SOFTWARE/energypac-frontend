@@ -282,7 +282,7 @@ const BillingAnalytics = () => {
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {analyticsData.top_clients?.map((client, idx) => (
-                                        <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                                        <tr key={idx} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition-colors">
                                             <td className="px-6 py-3 font-medium text-slate-800">{client.client_name}</td>
                                             <td className="px-6 py-3 text-right font-mono text-blue-600">{formatCurrency(client.total_revenue)}</td>
                                             <td className="px-6 py-3 text-right font-mono text-emerald-600">{formatCurrency(client.total_paid)}</td>

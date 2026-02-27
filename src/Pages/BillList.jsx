@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import AlertToast from "../components/ui/AlertToast";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import BillDetailsModal from "../components/sales/BillDetailsModal";
-import { getBills, getBillsByWorkOrder, getAllWorkOrders, getBillById, markBillAsPaid, cancelBill, getBillReport, getOutstandingReport } from "../services/salesService";
-import { FaSearch, FaFilter, FaEye, FaMoneyBillWave, FaTimes, FaFileExcel } from "react-icons/fa";
+import { getBills, getBillsByWorkOrder, getAllWorkOrders, getBillById, markBillAsPaid, cancelBill, getBillReport, getOutstandingReport, getBillPaymentHistory } from "../services/salesService";
+import { FaSearch, FaFilter, FaEye, FaMoneyBillWave, FaTimes, FaFileExcel, FaHistory } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
@@ -27,9 +27,8 @@ const BillList = () => {
     const [confirm, setConfirm] = useState({ open: false, action: null });
 
     // Payment Modal State
-    const [paymentModal, setPaymentModal] = useState({ open: false, bill: null, amount: "" });
+    const [paymentModal, setPaymentModal] = useState({ open: false, bill: null, amount: "", payment_date: "", payment_mode: "CASH", reference_number: "", remarks: "" });
     const [paymentSubmitting, setPaymentSubmitting] = useState(false);
-
 
     // Dropdown Data
     const [workOrders, setWorkOrders] = useState([]);
@@ -39,6 +38,9 @@ const BillList = () => {
     const [billDetails, setBillDetails] = useState(null);
 
     const [detailsLoading, setDetailsLoading] = useState(false);
+
+    // Payment History Modal State
+    const [historyModal, setHistoryModal] = useState({ open: false, data: null, loading: false });
 
     // Report State
     const [showReportModal, setShowReportModal] = useState(false);
@@ -160,22 +162,49 @@ const BillList = () => {
     const openPaymentModal = (bill) => {
         // Default amount to balance if positive, otherwise 0
         const defaultAmount = parseFloat(bill.balance) > 0 ? bill.balance : "0.00";
-        setPaymentModal({ open: true, bill, amount: defaultAmount });
+        setPaymentModal({
+            open: true,
+            bill,
+            amount: defaultAmount,
+            payment_date: new Date().toISOString().split("T")[0],
+            payment_mode: "CASH",
+            reference_number: "",
+            remarks: ""
+        });
     };
 
     const handlePaymentSubmit = async (e) => {
         e.preventDefault();
         setPaymentSubmitting(true);
         try {
-            await markBillAsPaid(paymentModal.bill.id, paymentModal.amount);
+            const payload = {
+                amount_paid: parseFloat(paymentModal.amount),
+                payment_date: paymentModal.payment_date,
+                payment_mode: paymentModal.payment_mode,
+                reference_number: paymentModal.reference_number,
+                remarks: paymentModal.remarks
+            };
+            await markBillAsPaid(paymentModal.bill.id, payload);
             setAlert({ open: true, type: "success", message: "Payment recorded successfully" });
-            setPaymentModal({ open: false, bill: null, amount: "" });
+            setPaymentModal({ open: false, bill: null, amount: "", payment_date: "", payment_mode: "NEFT", reference_number: "", remarks: "" });
             fetchBills(); // Refresh list
         } catch (error) {
             console.error("Payment failed", error);
             setAlert({ open: true, type: "error", message: "Failed to record payment" });
         } finally {
             setPaymentSubmitting(false);
+        }
+    };
+
+    const handleViewHistory = async (bill) => {
+        setHistoryModal({ open: true, data: null, loading: true });
+        try {
+            const data = await getBillPaymentHistory(bill.id);
+            setHistoryModal({ open: true, data: data, loading: false });
+        } catch (error) {
+            console.error("Failed to fetch history", error);
+            setAlert({ open: true, type: "error", message: "Failed to fetch payment history" });
+            setHistoryModal({ open: false, data: null, loading: false });
         }
     };
 
@@ -481,7 +510,7 @@ const BillList = () => {
                                 </tr>
                             ) : (
                                 bills.map((bill) => (
-                                    <tr key={bill.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <tr key={bill.id} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition-colors">
                                         <td className="px-6 py-4 font-mono font-semibold text-blue-600 text-sm">
                                             {bill.bill_number}
                                         </td>
@@ -519,6 +548,13 @@ const BillList = () => {
                                                 className="text-slate-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
                                             >
                                                 <FaEye />
+                                            </button>
+                                            <button
+                                                onClick={() => handleViewHistory(bill)}
+                                                title="Payment History"
+                                                className="text-purple-500 hover:text-purple-700 p-2 rounded-full hover:bg-purple-50 transition-colors"
+                                            >
+                                                <FaHistory />
                                             </button>
                                             {bill.status !== 'PAID' && bill.status !== 'CANCELLED' && (
                                                 <>
@@ -612,24 +648,86 @@ const BillList = () => {
                             <div className="font-mono font-bold text-red-600 text-lg">₹{paymentModal.bill?.balance}</div>
                         </div>
 
-                        <form onSubmit={handlePaymentSubmit}>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                Amount Paid (₹)
-                            </label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                required
-                                value={paymentModal.amount}
-                                onChange={(e) => setPaymentModal({ ...paymentModal, amount: e.target.value })}
-                                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none text-lg font-mono mb-6"
-                            />
+                        <form onSubmit={handlePaymentSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">
+                                    Amount Paid (₹) *
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    required
+                                    value={paymentModal.amount}
+                                    onChange={(e) => setPaymentModal({ ...paymentModal, amount: e.target.value })}
+                                    className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none text-lg font-mono focus:border-transparent"
+                                />
+                            </div>
 
-                            <div className="flex justify-end gap-3">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">
+                                        Payment Date *
+                                    </label>
+                                    <input
+                                        type="date"
+                                        required
+                                        value={paymentModal.payment_date}
+                                        onChange={(e) => setPaymentModal({ ...paymentModal, payment_date: e.target.value })}
+                                        className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">
+                                        Payment Mode *
+                                    </label>
+                                    <select
+                                        required
+                                        value={paymentModal.payment_mode}
+                                        onChange={(e) => setPaymentModal({ ...paymentModal, payment_mode: e.target.value })}
+                                        className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none focus:border-transparent"
+                                    >
+                                        <option value="CASH">Cash</option>
+                                        <option value="CHEQUE">Cheque</option>
+                                        <option value="NEFT">NEFT</option>
+                                        <option value="RTGS">RTGS</option>
+                                        <option value="IMPS">IMPS</option>
+                                        <option value="UPI">UPI</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">
+                                    Reference Number
+                                </label>
+                                <input
+                                    type="text"
+                                    value={paymentModal.reference_number}
+                                    onChange={(e) => setPaymentModal({ ...paymentModal, reference_number: e.target.value })}
+                                    placeholder="UTR / Check No. / Transaction ID"
+                                    className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none focus:border-transparent"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">
+                                    Remarks
+                                </label>
+                                <textarea
+                                    rows="2"
+                                    value={paymentModal.remarks}
+                                    onChange={(e) => setPaymentModal({ ...paymentModal, remarks: e.target.value })}
+                                    placeholder="Any additional notes..."
+                                    className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none focus:border-transparent"
+                                ></textarea>
+                            </div>
+
+                            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
                                 <button
                                     type="button"
-                                    onClick={() => setPaymentModal({ open: false, bill: null, amount: "" })}
+                                    onClick={() => setPaymentModal({ open: false, bill: null, amount: "", payment_date: "", payment_mode: "NEFT", reference_number: "", remarks: "" })}
                                     className="px-4 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-lg transition-colors"
                                 >
                                     Cancel
@@ -643,6 +741,81 @@ const BillList = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Payment History Modal */}
+            {historyModal.open && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-hidden flex flex-col">
+                        <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <FaHistory className="text-purple-600" /> Payment History
+                            </h3>
+                            <button
+                                onClick={() => setHistoryModal({ open: false, data: null, loading: false })}
+                                className="text-slate-400 hover:text-slate-600"
+                            >
+                                <FaTimes size={20} />
+                            </button>
+                        </div>
+
+                        {historyModal.loading ? (
+                            <div className="flex justify-center py-12">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                            </div>
+                        ) : historyModal.data ? (
+                            <div className="overflow-y-auto pr-2">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-100">
+                                    <div>
+                                        <div className="text-xs text-slate-500">Bill No</div>
+                                        <div className="font-mono font-semibold text-slate-800">{historyModal.data.bill_number}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-slate-500">Total Payable</div>
+                                        <div className="font-mono font-bold text-slate-800">₹{parseFloat(historyModal.data.net_payable).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-slate-500">Total Paid</div>
+                                        <div className="font-mono font-bold text-green-600">₹{parseFloat(historyModal.data.total_paid).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-slate-500">Balance</div>
+                                        <div className="font-mono font-bold text-red-600">₹{parseFloat(historyModal.data.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                                    </div>
+                                </div>
+
+                                {historyModal.data.payments && historyModal.data.payments.length > 0 ? (
+                                    <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                                        {historyModal.data.payments.map((payment, index) => (
+                                            <div key={payment.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                                                <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-200 group-[.is-active]:bg-purple-100 text-purple-600 font-bold shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                                                    {index + 1}
+                                                </div>
+                                                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded border border-slate-200 shadow-sm relative">
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <div className="font-bold text-slate-800">₹{parseFloat(payment.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                                                        <time className="font-mono text-xs font-medium text-slate-500">{new Date(payment.created_at).toLocaleString()}</time>
+                                                    </div>
+                                                    <div className="text-slate-600 text-sm">Mode: <span className="font-semibold">{payment.payment_mode_display}</span></div>
+                                                    <div className="flex justify-between items-center text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100">
+                                                        {/* <span>Paid by: {payment.recorded_by_name}</span> */}
+                                                        <span className="font-mono text-xs">Bal: ₹{parseFloat(payment.balance_after).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-lg">
+                                        No payments recorded yet.
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-slate-500">Failed to load payload</div>
+                        )}
                     </div>
                 </div>
 

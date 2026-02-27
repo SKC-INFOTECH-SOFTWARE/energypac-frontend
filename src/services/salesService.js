@@ -408,6 +408,16 @@ export const getBillDetailedReport = async (billId) => {
     }
 };
 
+export const getBillPaymentHistory = async (id) => {
+    try {
+        const response = await axiosSecure.get(`/api/bills/${id}/payment_history`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching bill payment history:", error);
+        throw error;
+    }
+};
+
 export const getBillingDashboardStats = async () => {
     try {
         const response = await axiosSecure.get("/api/dashboard/billing/stats");
@@ -441,11 +451,11 @@ export const updateWorkOrderAdvance = async (id, advanceAmount) => {
     }
 };
 
-export const markBillAsPaid = async (id, amountPaid) => {
+export const markBillAsPaid = async (id, payload) => {
     try {
         const response = await axiosSecure.post(
             `/api/bills/${id}/mark_paid`,
-            { amount_paid: amountPaid }
+            payload
         );
         return response.data;
     } catch (error) {

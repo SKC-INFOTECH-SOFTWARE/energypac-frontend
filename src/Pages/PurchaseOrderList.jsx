@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { fetchPurchaseOrders, getPurchaseOrderReport } from "../services/purchaseOrderService";
-import { FaEye, FaFileExcel } from "react-icons/fa";
+import { fetchPurchaseOrders, getPurchaseOrderReport, cancelPurchaseOrder } from "../services/purchaseOrderService";
+import { FaEye, FaFileExcel, FaTimes } from "react-icons/fa";
 import AlertToast from "../components/ui/AlertToast";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
 import PurchaseOrderModal from "../components/purchaseOrder/PurchaseOrderModal";
 import VendorSelector from "../components/common/VendorSelector";
 import * as XLSX from "xlsx";
@@ -20,6 +21,7 @@ const PurchaseOrderList = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedPO, setSelectedPO] = useState(null);
     const [page, setPage] = useState(1);
+    const [confirm, setConfirm] = useState({ open: false, action: null });
 
 
 
@@ -222,6 +224,26 @@ const PurchaseOrderList = () => {
         setModalOpen(true);
     };
 
+    const handleCancelPO = (poId) => {
+        setConfirm({
+            open: true,
+            title: "Cancel Purchase Order?",
+            description: "Are you sure you want to cancel this Purchase Order? This action cannot be undone.",
+            action: async () => {
+                try {
+                    await cancelPurchaseOrder(poId);
+                    setToast({ open: true, type: "success", message: "Purchase Order cancelled successfully" });
+                    loadData(page);
+                } catch (error) {
+                    console.error("Failed to cancel PO", error);
+                    setToast({ open: true, type: "error", message: "Failed to cancel Purchase Order" });
+                } finally {
+                    setConfirm({ ...confirm, open: false });
+                }
+            }
+        });
+    };
+
     return (
         <div>
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -272,7 +294,7 @@ const PurchaseOrderList = () => {
                                 </tr>
                             ) : list.length > 0 ? (
                                 list.map((row) => (
-                                    <tr key={row.id} className="hover:bg-slate-50 transition">
+                                    <tr key={row.id} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition">
                                         <td className="px-6 py-4">
                                             <span className="font-mono text-blue-600 font-semibold cursor-pointer hover:underline" onClick={() => handleView(row)}>
                                                 {row.po_number}
@@ -292,12 +314,34 @@ const PurchaseOrderList = () => {
                                             {parseFloat(row.total_amount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                                ${row.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                                                    row.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                                                        'bg-slate-100 text-slate-800'}`}>
-                                                {row.status}
-                                            </span>
+                                            {(() => {
+                                                const allReceived = row.items && row.items.length > 0 && row.items.every(i => i.is_received);
+                                                const someReceived = row.items && row.items.length > 0 && row.items.some(i => i.is_received);
+
+                                                let displayStatus = row.status;
+                                                if (allReceived) {
+                                                    displayStatus = 'COMPLETED';
+                                                } else if (someReceived) {
+                                                    displayStatus = 'PARTIALLY_RECEIVED';
+                                                }
+
+                                                let statusText = displayStatus;
+                                                if (displayStatus === 'PENDING') statusText = 'Pending';
+                                                else if (displayStatus === 'PARTIALLY_RECEIVED') statusText = 'Partially Received';
+                                                else if (displayStatus === 'COMPLETED') statusText = 'Completed';
+                                                else if (displayStatus === 'CANCELLED') statusText = 'Cancelled';
+
+                                                return (
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                        ${displayStatus === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                                            displayStatus === 'PARTIALLY_RECEIVED' ? 'bg-blue-100 text-blue-800' :
+                                                                displayStatus === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
+                                                                    displayStatus === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                                                                        'bg-slate-100 text-slate-800'}`}>
+                                                        {statusText}
+                                                    </span>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex justify-center gap-3">
@@ -308,6 +352,15 @@ const PurchaseOrderList = () => {
                                                 >
                                                     <FaEye />
                                                 </button>
+                                                {row.status !== 'COMPLETED' && row.status !== 'CANCELLED' && (
+                                                    <button
+                                                        onClick={() => handleCancelPO(row.id)}
+                                                        title="Cancel PO"
+                                                        className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                                    >
+                                                        <FaTimes size={12} />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -350,11 +403,21 @@ const PurchaseOrderList = () => {
                 onClose={() => setToast({ ...toast, open: false })}
             />
 
+            <ConfirmDialog
+                open={confirm.open}
+                title={confirm.title}
+                message={confirm.description}
+                confirmText={confirm.confirmText || "Confirm"}
+                onConfirm={confirm.action}
+                onCancel={() => setConfirm({ ...confirm, open: false })}
+            />
+
             <PurchaseOrderModal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
                 data={selectedPO}
                 onShowAlert={(type, message) => setToast({ open: true, type, message })}
+                onUpdate={() => loadData(page)}
             />
             {/* REPORT MODAL */}
             {showReportModal && (

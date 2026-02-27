@@ -288,7 +288,7 @@ const CreateWorkOrder = () => {
                                 </thead>
                                 <tbody>
                                     {formData.items.map((item, index) => (
-                                        <tr key={index} className="border-b hover:bg-slate-50 last:border-b-0">
+                                        <tr key={index} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200 border-b last:border-b-0 ">
                                             <td className="px-4 py-3 font-medium text-slate-900">
                                                 {item.item_name}
                                                 <div className="text-xs text-slate-500">{item.item_code}</div>

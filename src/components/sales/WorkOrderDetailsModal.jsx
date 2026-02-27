@@ -274,7 +274,7 @@ const WorkOrderDetailsModal = ({ isOpen, onClose, loading, details }) => {
                                         </thead>
                                         <tbody className="divide-y divide-slate-100">
                                             {details.items.map((item) => (
-                                                <tr key={item.id} className="hover:bg-slate-50">
+                                                <tr key={item.id} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   ">
                                                     <td className="px-4 py-3">
                                                         <div className="font-medium text-slate-900">{item.item_name}</div>
                                                         <div className="text-xs text-slate-500">{item.item_code}</div>

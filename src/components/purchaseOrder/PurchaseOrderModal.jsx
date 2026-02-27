@@ -6,7 +6,7 @@ import { markItemPurchased, getPurchaseOrder } from "../../services/purchaseOrde
 import AlertToast from "../ui/AlertToast";
 import ConfirmDialog from "../ui/ConfirmDialog";
 
-const PurchaseOrderModal = ({ open, onClose, data, onShowAlert }) => {
+const PurchaseOrderModal = ({ open, onClose, data, onShowAlert, onUpdate }) => {
     const modalRef = useRef(null);
 
     // Close on escape key
@@ -114,8 +114,10 @@ const PurchaseOrderModal = ({ open, onClose, data, onShowAlert }) => {
 
         if (errors === 0) {
             onShowAlert("success", `${successCount} items marked as purchased successfully.`);
+            if (onUpdate) onUpdate();
         } else {
             onShowAlert("warning", `Marked ${successCount} items. Failed: ${errors}`);
+            if (successCount > 0 && onUpdate) onUpdate();
         }
     };
 
@@ -164,7 +166,7 @@ const PurchaseOrderModal = ({ open, onClose, data, onShowAlert }) => {
                             title="Print / Preview PDF"
                         >
                             {generatingPdf ? <div className="animate-spin h-4 w-4 border-2 border-blue-600 rounded-full border-t-transparent"></div> : <FaPrint size={20} />}
-                            
+
                         </button>
                         <button
                             onClick={onClose}
@@ -204,12 +206,34 @@ const PurchaseOrderModal = ({ open, onClose, data, onShowAlert }) => {
                                     <div className="flex items-center gap-2 mb-2">
                                         <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Status</span>
                                     </div>
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                ${poData.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                                            poData.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                                                'bg-slate-100 text-slate-800'}`}>
-                                        {poData.status}
-                                    </span>
+                                    {(() => {
+                                        const allReceived = items && items.length > 0 && items.every(i => i.is_received);
+                                        const someReceived = items && items.length > 0 && items.some(i => i.is_received);
+
+                                        let displayStatus = poData.status;
+                                        if (allReceived) {
+                                            displayStatus = 'COMPLETED';
+                                        } else if (someReceived) {
+                                            displayStatus = 'PARTIALLY_RECEIVED';
+                                        }
+
+                                        let statusText = displayStatus;
+                                        if (displayStatus === 'PENDING') statusText = 'Pending';
+                                        else if (displayStatus === 'PARTIALLY_RECEIVED') statusText = 'Partially Received';
+                                        else if (displayStatus === 'COMPLETED') statusText = 'Completed';
+                                        else if (displayStatus === 'CANCELLED') statusText = 'Cancelled';
+
+                                        return (
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                ${displayStatus === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                                    displayStatus === 'PARTIALLY_RECEIVED' ? 'bg-blue-100 text-blue-800' :
+                                                        displayStatus === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
+                                                            displayStatus === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                                                                'bg-slate-100 text-slate-800'}`}>
+                                                {statusText}
+                                            </span>
+                                        );
+                                    })()}
                                     <div className="text-sm text-slate-500 mt-2">
                                         Created: {new Date(poData.created_at).toLocaleDateString()}
                                     </div>
@@ -233,7 +257,7 @@ const PurchaseOrderModal = ({ open, onClose, data, onShowAlert }) => {
                                         </thead>
                                         <tbody className="divide-y divide-slate-100">
                                             {items.map((item) => (
-                                                <tr key={item.id} className="hover:bg-slate-50/50">
+                                                <tr key={item.id} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   ">
                                                     <td className="px-4 py-3">
                                                         <div className="font-medium text-slate-800">{item.product_name}</div>
                                                         <div className="text-xs text-slate-500 font-mono">{item.product_code}</div>

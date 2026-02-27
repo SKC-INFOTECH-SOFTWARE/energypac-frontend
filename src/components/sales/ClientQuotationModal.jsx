@@ -319,7 +319,7 @@ const ClientQuotationModal = ({ isOpen, onClose, onSuccess }) => {
                                             </tr>
                                         )}
                                         {items.map((item, index) => (
-                                            <tr key={item.id} className="hover:bg-slate-50/50 group align-top">
+                                            <tr key={item.id} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200  group align-top ">
                                                 <td className="px-3 py-3 text-slate-500 pt-5">{items.length - index}</td>
 
                                                 {/* ITEM DETAILS COLUMN */}

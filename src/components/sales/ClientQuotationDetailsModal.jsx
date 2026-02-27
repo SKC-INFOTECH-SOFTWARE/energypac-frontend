@@ -146,7 +146,7 @@ const ClientQuotationDetailsModal = ({ isOpen, onClose, quotation }) => {
                                         </thead>
                                         <tbody className="divide-y divide-slate-100">
                                             {details.items?.map((item, idx) => (
-                                                <tr key={idx} className="hover:bg-slate-50/50">
+                                                <tr key={idx} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   ">
                                                     <td className="px-4 py-3 font-medium text-slate-800">
                                                         {item.item_name}
                                                         {item.from_stock && <span className="ml-2 text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100">STOCK</span>}

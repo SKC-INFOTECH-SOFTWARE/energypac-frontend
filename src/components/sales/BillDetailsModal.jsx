@@ -291,7 +291,7 @@ const BillDetailsModal = ({ isOpen, onClose, loading, details }) => {
                                         </thead>
                                         <tbody className="divide-y divide-slate-100 bg-white">
                                             {details.items?.map((item, idx) => (
-                                                <tr key={item.id || idx} className="hover:bg-slate-50 transition-colors">
+                                                <tr key={item.id || idx} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition-colors">
                                                     <td className="px-5 py-3">
                                                         <div className="font-semibold text-slate-800">{item.item_name}</div>
                                                         <div className="flex flex-wrap gap-2 mt-1">

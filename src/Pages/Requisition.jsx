@@ -483,7 +483,7 @@ const Requisition = () => {
                 </tr>
               ) : list.length > 0 ? (
                 list.map((row) => (
-                  <tr key={row.id} className="hover:bg-slate-50 transition">
+                  <tr key={row.id} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {/* 

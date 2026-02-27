@@ -323,7 +323,7 @@ const CreateBill = () => {
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {formData.items.map((item, index) => (
-                                        <tr key={item.work_order_item} className="hover:bg-slate-50 transition-colors">
+                                        <tr key={item.work_order_item} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="font-bold text-slate-800">{item.item_name}</div>
                                                 <div className="text-xs text-slate-500 font-mono mt-0.5">{item.item_code}</div>

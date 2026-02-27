@@ -384,7 +384,7 @@ const WorkOrderList = () => {
                                 </tr>
                             ) : (
                                 workOrders.map((wo) => (
-                                    <tr key={wo.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <tr key={wo.id} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition-colors">
                                         <td className="px-6 py-4 font-mono text-blue-600 font-semibold">
                                             {wo.wo_number}
                                             <div className="text-xs text-slate-400 mt-0.5">{wo.quotation_number}</div>

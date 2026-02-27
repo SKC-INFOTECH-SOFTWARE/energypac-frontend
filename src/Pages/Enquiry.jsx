@@ -263,7 +263,7 @@ const Enquiry = () => {
                             </tr>
                         ) : enquiries.length > 0 ? (
                             enquiries.map((item) => (
-                                <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                                <tr key={item.id} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition-colors">
                                     <td className="px-6 py-4 font-mono text-blue-600 font-semibold">
                                         {item.query_number}
                                     </td>

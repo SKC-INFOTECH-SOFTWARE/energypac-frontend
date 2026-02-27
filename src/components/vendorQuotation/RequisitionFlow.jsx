@@ -121,7 +121,7 @@ const RequisitionFlow = ({ requisitionId: propRequisitionId }) => {
                                     vendor_assignments.map((assignment, idx) => {
                                         const { vendor, assigned_items } = assignment;
                                         return (
-                                            <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                                            <tr key={idx} className="odd:bg-slate-100 even:bg-white hover:bg-slate-200   transition-colors">
 
                                                 {/* Vendor Details */}
                                                 <td className="px-3 py-3 align-top border-r border-slate-300">

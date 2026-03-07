@@ -81,35 +81,84 @@ const VendorQuotationViewModal = ({ open, onClose, quotationId }) => {
 
                                         <div className="space-y-1 text-sm text-slate-600">
                                             <div className="flex items-center gap-2">
-                                                <FaBoxOpen className="text-slate-400 w-4" />
-                                                <span className="font-semibold">Requisition:</span> {data.requisition_number}
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <FaUserTie className="text-slate-400 w-4" />
-                                                <span className="font-semibold">Vendor:</span> {data.vendor_name}
-                                                <span className="text-xs bg-slate-100 px-1.5 rounded-md text-slate-500">{data.vendor_code}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
                                                 <FaCalendarAlt className="text-slate-400 w-4" />
                                                 <span className="font-semibold">Quoted Date:</span> {data.quotation_date}
+                                            </div>
+                                            <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1">
+                                                {(data.gst_number || data?.vendor?.gst_number) && (
+                                                    <div className="text-[10px] px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded border border-blue-100">
+                                                        <span className="font-bold">GST:</span> {data.gst_number || data?.vendor?.gst_number}
+                                                    </div>
+                                                )}
+                                                {(data.pan_number || data?.vendor?.pan_number) && (
+                                                    <div className="text-[10px] px-1.5 py-0.5 bg-slate-50 text-slate-700 rounded border border-slate-200">
+                                                        <span className="font-bold">PAN:</span> {data.pan_number || data?.vendor?.pan_number}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Right: Terms & Validity */}
                                     <div className="text-right space-y-2 text-sm">
-                                        <div className="bg-amber-50 text-amber-900 px-3 py-1 rounded-lg border border-amber-100 inline-block mb-2">
+                                        <div className="flex items-center gap-2">
+                                            {/* <FaBoxOpen className="text-slate-400 w-4" />
+                                                <span className="font-semibold">Requisition:</span> {data.requisition_number} */}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <FaBoxOpen className="text-slate-400 w-4" />
+                                            <span className="font-semibold">Requisition:</span> {data.requisition_number}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <FaUserTie className="text-slate-400 w-4" />
+                                            <span className="font-semibold">Vendor:</span> {data.vendor_name}
+                                            <span className="text-xs bg-slate-100 px-1.5 rounded-md text-slate-500">{data.vendor_code}</span>
+                                        </div>
+                                        {/* <div className="bg-amber-50 text-amber-900 px-3 py-1 rounded-lg border border-amber-100 inline-block mb-2">
                                             <span className="font-semibold">Valid Until:</span> {data.validity_date}
                                         </div>
                                         <div><span className="text-slate-500 font-semibold">Ref No:</span> {data.reference_number || "-"}</div>
                                         <div><span className="text-slate-500 font-semibold">Payment:</span> {data.payment_terms || "-"}</div>
-                                        <div><span className="text-slate-500 font-semibold">Delivery:</span> {data.delivery_terms || "-"}</div>
+                                        <div><span className="text-slate-500 font-semibold">Delivery:</span> {data.delivery_terms || "-"}</div> */}
                                     </div>
                                 </div>
 
                                 {data.remarks && (
                                     <div className="mt-4 pt-4 border-t border-slate-100 text-sm text-slate-600 italic bg-slate-50/50 p-2 rounded">
                                         <span className="font-semibold not-italic text-slate-500 mr-1">Remarks:</span> {data.remarks}
+                                    </div>
+                                )}
+
+                                {/* Bank Details */}
+                                {(data.bank_name || data?.vendor?.bank_name || data.bank_account_number || data?.vendor?.bank_account_number || data?.account_number || data?.vendor?.account_number) && (
+                                    <div className="mt-4 pt-4 border-t border-slate-100">
+                                        <h4 className="text-sm font-bold text-slate-700 mb-3">
+                                            Bank Details
+                                        </h4>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                            <div>
+                                                <span className="block text-slate-500 text-xs">Bank Name:</span>
+                                                <span className="font-medium text-slate-800">{data.bank_name || data?.vendor?.bank_name || "-"}</span>
+                                            </div>
+                                            <div>
+                                                <span className="block text-slate-500 text-xs">Account Name:</span>
+                                                <span className="font-medium text-slate-800">{data.account_name || data?.vendor?.account_name || "-"}</span>
+                                            </div>
+                                            <div>
+                                                <span className="block text-slate-500 text-xs">Account Number:</span>
+                                                <span className="font-medium text-slate-800">{data.bank_account_number || data?.vendor?.bank_account_number || data?.account_number || data?.vendor?.account_number || "-"}</span>
+                                            </div>
+                                            <div>
+                                                <span className="block text-slate-500 text-xs">IFSC Code:</span>
+                                                <span className="font-medium text-slate-800">{data.ifsc_code || data?.vendor?.ifsc_code || "-"}</span>
+                                            </div>
+                                            {(data.swift_code || data?.vendor?.swift_code) && (
+                                                <div>
+                                                    <span className="block text-slate-500 text-xs">Swift Code:</span>
+                                                    <span className="font-medium text-slate-800">{data.swift_code || data?.vendor?.swift_code}</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>

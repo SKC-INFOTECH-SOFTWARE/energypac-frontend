@@ -195,7 +195,7 @@ const RequisitionModal = ({ open, onClose, editData, onSuccess, viewOnly = false
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center rounded-t-2xl">
           <div>
             <h2 className="text-xl font-bold text-slate-900">
-              {editData ? "Edit Requisition" : "New Requisition"}
+              {viewOnly ? "View Requisition" : editData ? "Edit Requisition" : "New Requisition"}
             </h2>
             <p className="text-sm text-slate-500">
               {viewOnly

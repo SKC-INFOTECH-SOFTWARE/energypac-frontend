@@ -1,12 +1,13 @@
 
 import { useState, useEffect } from "react";
 import { FaTimes, FaPlus, FaTrash, FaBoxOpen, FaLayerGroup } from "react-icons/fa";
-import { createClientQuotation, getClientQueries } from "../../services/salesService";
+import { toast } from "react-hot-toast";
+import { createClientQuotation, updateClientQuotation, getClientQueries } from "../../services/salesService";
 import ProductSelector from "../common/ProductSelector";
 import ProductModal from "../products/ProductModal";
-import { toast } from "react-hot-toast";
 
-const ClientQuotationModal = ({ isOpen, onClose, onSuccess }) => {
+const ClientQuotationModal = ({ isOpen, onClose, onSuccess, quotation = null }) => {
+    const isEdit = !!quotation;
     const [formData, setFormData] = useState({
         client_query: "",
         quotation_date: new Date().toISOString().split('T')[0],
@@ -26,9 +27,55 @@ const ClientQuotationModal = ({ isOpen, onClose, onSuccess }) => {
     const [showProductModal, setShowProductModal] = useState(false);
 
 
+    // Populate form on edit
+    useEffect(() => {
+        if (isOpen && quotation) {
+            setFormData({
+                client_query: quotation.client_query,
+                quotation_date: quotation.quotation_date,
+                validity_date: quotation.validity_date,
+                payment_terms: quotation.payment_terms || "",
+                delivery_terms: quotation.delivery_terms || "",
+                remarks: quotation.remarks || "",
+                cgst_percentage: quotation.cgst_percentage || 0,
+                sgst_percentage: quotation.sgst_percentage || 0,
+                igst_percentage: quotation.igst_percentage || 0,
+            });
+
+            const populatedItems = quotation.items.map(item => ({
+                id: item.id || Date.now() + Math.random(),
+                product: item.product,
+                product_details: {
+                    hsn_code: item.hsn_code,
+                    unit: item.unit,
+                    current_stock: item.stock_quantity,
+                },
+                quantity: item.quantity,
+                rate: item.rate,
+                remarks: item.remarks || "",
+                type: 'stock'
+            }));
+            setItems(populatedItems);
+        } else if (isOpen && !quotation) {
+            // Reset for new creation
+            setFormData({
+                client_query: "",
+                quotation_date: new Date().toISOString().split('T')[0],
+                validity_date: "",
+                payment_terms: "",
+                delivery_terms: "",
+                remarks: "",
+                cgst_percentage: 9,
+                sgst_percentage: 9,
+                igst_percentage: 0,
+            });
+            setItems([]);
+        }
+    }, [isOpen, quotation]);
+
     // Fetch Client Queries for Dropdown
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && !isEdit) {
             const fetchQueries = async () => {
                 try {
                     const data = await getClientQueries(1, ""); // Fetch first page/all
@@ -39,7 +86,7 @@ const ClientQuotationModal = ({ isOpen, onClose, onSuccess }) => {
             };
             fetchQueries();
         }
-    }, [isOpen]);
+    }, [isOpen, isEdit]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -110,7 +157,13 @@ const ClientQuotationModal = ({ isOpen, onClose, onSuccess }) => {
                 })
             };
 
-            await createClientQuotation(payload);
+            if (isEdit) {
+                await updateClientQuotation(quotation.id, payload);
+            } else {
+                await createClientQuotation(payload);
+            }
+            const successMsg = isEdit ? "Quotation updated successfully!" : "Quotation created successfully!";
+
             setFormData({
                 client_query: "",
                 quotation_date: new Date().toISOString().split('T')[0],
@@ -123,7 +176,7 @@ const ClientQuotationModal = ({ isOpen, onClose, onSuccess }) => {
                 igst_percentage: 0,
             });
             setItems([]);
-            onSuccess();
+            onSuccess(successMsg);
             onClose();
         } catch (err) {
             console.error(err);
@@ -141,7 +194,9 @@ const ClientQuotationModal = ({ isOpen, onClose, onSuccess }) => {
             <div className="bg-white w-full max-w-7xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
-                    <h2 className="text-xl font-bold text-slate-800">New Client Quotation</h2>
+                    <h2 className="text-xl font-bold text-slate-800">
+                        {isEdit ? `Edit Quotation: ${quotation.quotation_number}` : "New Client Quotation"}
+                    </h2>
                     <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-white rounded-full transition-all">
                         <FaTimes />
                     </button>
@@ -164,15 +219,22 @@ const ClientQuotationModal = ({ isOpen, onClose, onSuccess }) => {
                                     name="client_query"
                                     value={formData.client_query}
                                     onChange={handleInputChange}
-                                    className="input w-full"
+                                    className="input w-full disabled:bg-slate-100 disabled:text-slate-500"
                                     required
+                                    disabled={isEdit}
                                 >
-                                    <option value="">Select Query</option>
-                                    {queries.map(q => (
-                                        <option key={q.id} value={q.id}>
-                                            {q.query_number} - {q.client_name}
-                                        </option>
-                                    ))}
+                                    {isEdit ? (
+                                        <option value={quotation.client_query}>{quotation.query_number} - {quotation.client_name}</option>
+                                    ) : (
+                                        <>
+                                            <option value="">Select Query</option>
+                                            {queries.map(q => (
+                                                <option key={q.id} value={q.id}>
+                                                    {q.query_number} - {q.client_name}
+                                                </option>
+                                            ))}
+                                        </>
+                                    )}
                                 </select>
                             </div>
 
@@ -443,7 +505,7 @@ const ClientQuotationModal = ({ isOpen, onClose, onSuccess }) => {
                         disabled={submitting}
                         className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 shadow-md hover:shadow-lg transition-all"
                     >
-                        {submitting ? "Creating..." : "Create Quotation"}
+                        {submitting ? (isEdit ? "Updating..." : "Creating...") : (isEdit ? "Update Quotation" : "Create Quotation")}
                     </button>
                 </div>
             </div>

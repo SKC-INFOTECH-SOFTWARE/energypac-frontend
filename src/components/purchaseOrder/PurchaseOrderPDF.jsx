@@ -125,9 +125,21 @@ const PurchaseOrderPDF = ({ details }) => {
                 {/* Financials Breakdown */}
                 <View style={styles.totals}>
                     <View style={styles.totalBox}>
+                        {details.freight_cost > 0 && (
+                            <>
+                                <View style={styles.totalRow}>
+                                    <View style={{ width: '60%', textAlign: 'right' }}><Text style={{ color: '#64748B' }}>Sub Total:</Text></View>
+                                    <View style={{ width: '40%', textAlign: 'right' }}><Text>{formatCurrency(parseFloat(details.total_amount) - parseFloat(details.freight_cost))}</Text></View>
+                                </View>
+                                <View style={styles.totalRow}>
+                                    <View style={{ width: '60%', textAlign: 'right' }}><Text style={{ color: '#64748B' }}>Freight Cost:</Text></View>
+                                    <View style={{ width: '40%', textAlign: 'right' }}><Text>{formatCurrency(details.freight_cost)}</Text></View>
+                                </View>
+                            </>
+                        )}
                         <View style={styles.grandTotal}>
-                            <Text>Total Amount</Text>
-                            <Text>{formatCurrency(details.total_amount)}</Text>
+                            <View style={{ width: '60%', textAlign: 'right' }}><Text>Total Amount</Text></View>
+                            <View style={{ width: '40%', textAlign: 'right' }}><Text>{formatCurrency(details.total_amount)}</Text></View>
                         </View>
                     </View>
                 </View>

@@ -177,7 +177,7 @@ const BillDetailsModal = ({ isOpen, onClose, loading, details }) => {
                                 title="Print / Preview PDF"
                             >
                                 {generatingPdf ? <div className="animate-spin h-4 w-4 border-2 border-blue-600 rounded-full border-t-transparent"></div> : <FaPrint size={20} />}
-                                
+
                             </button>
                         )}
                         {details && (
@@ -188,7 +188,7 @@ const BillDetailsModal = ({ isOpen, onClose, loading, details }) => {
                                 title="Export to Excel"
                             >
                                 <FaFileExcel size={20} />
-                               
+
                             </button>
                         )}
                         <button
@@ -233,6 +233,13 @@ const BillDetailsModal = ({ isOpen, onClose, loading, details }) => {
                                         <span className="font-medium text-slate-900 flex items-center gap-1">
                                             <FaHashtag className="text-slate-400 text-xs" />
                                             {details.wo_number}
+                                        </span>
+                                    </div>
+                                    <div className="w-px h-8 bg-slate-300 hidden md:block"></div>
+                                    <div className="text-sm">
+                                        <span className="text-slate-500 block text-xs uppercase font-semibold">Bill Type</span>
+                                        <span className={`font-bold flex items-center gap-1 ${details.bill_type === 'INTERNATIONAL' ? 'text-orange-600' : 'text-blue-600'}`}>
+                                            {details.bill_type || 'DOMESTIC'}
                                         </span>
                                     </div>
                                 </div>
@@ -365,7 +372,6 @@ const BillDetailsModal = ({ isOpen, onClose, loading, details }) => {
                                         <span>Subtotal</span>
                                         <span className="font-mono font-medium">{formatCurrency(details.subtotal)}</span>
                                     </div>
-
                                     {/* Taxes */}
                                     <div className="py-3 border-y border-slate-200 space-y-2">
                                         {parseFloat(details.cgst_amount) > 0 && (
@@ -404,6 +410,12 @@ const BillDetailsModal = ({ isOpen, onClose, loading, details }) => {
                                             <span>Less: Advance Deducted</span>
                                             <span className="font-mono">- {formatCurrency(details.advance_deducted)}</span>
                                         </div>
+                                        {parseFloat(details.freight_cost) > 0 && (
+                                        <div className="flex justify-between text-slate-600 text-sm">
+                                            <span>Freight Cost</span>
+                                            <span className="font-mono font-medium">{formatCurrency(details.freight_cost)}</span>
+                                        </div>
+                                    )}
                                         <div className="flex justify-between text-green-600 text-sm font-medium">
                                             <span>Amount Paid</span>
                                             <span className="font-mono">{formatCurrency(details.amount_paid)}</span>

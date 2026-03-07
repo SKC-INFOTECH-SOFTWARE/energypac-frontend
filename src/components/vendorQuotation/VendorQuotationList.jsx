@@ -119,7 +119,10 @@ const VendorQuotationList = ({ initialViewId }) => {
                                         </td>
                                         <td className="px-4 py-2">
                                             <div className="font-bold text-slate-900">{row.vendor_name}</div>
-                                            <div className="text-xs text-slate-500 font-mono">{row.vendor_code}</div>
+                                            <div className="text-xs text-slate-500 font-mono flex gap-2">
+                                                <span>{row.vendor_code}</span>
+                                                {row.gst_number && <span className="text-blue-600 font-bold">GST: {row.gst_number}</span>}
+                                            </div>
                                         </td>
                                         <td className="px-4 py-2 text-slate-700 text-sm">
                                             {row.quotation_date}
@@ -141,13 +144,13 @@ const VendorQuotationList = ({ initialViewId }) => {
                                                 >
                                                     <FaEye />
                                                 </button>
-                                                <button
+                                                {/* <button
                                                     onClick={() => handleEdit(row.id)}
                                                     className="p-2 text-blue-500 hover:text-blue-600 hover:bg-green-50 rounded-full transition-all"
                                                     title="Edit Quotation"
                                                 >
                                                     <FaEdit />
-                                                </button>
+                                                </button> */}
                                             </div>
                                         </td>
                                     </tr>

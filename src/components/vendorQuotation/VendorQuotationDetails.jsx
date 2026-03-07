@@ -186,14 +186,25 @@ const VendorQuotationDetails = () => {
                       {contextData.requisition_number || "Requisition"}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-slate-600">
+                  <div className="flex flex-wrap items-center gap-4 mt-2">
                     <div className="flex items-center gap-1.5">
                       <FaUserTie className="text-slate-400" />
-                      <span className="font-medium">{contextData.vendor_name || "Vendor"}</span>
+                      <span className="font-medium text-slate-700">{contextData.vendor_name || "Vendor"}</span>
                       <span className="text-xs bg-slate-200 px-1.5 rounded text-slate-600 font-mono">
                         {contextData.vendor_code}
                       </span>
                     </div>
+                    <div className="flex gap-2 text-[10px]">
+                      {contextData.gst_number && <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 font-bold">GST: {contextData.gst_number}</span>}
+                      {contextData.pan_number && <span className="bg-slate-50 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200 font-bold">PAN: {contextData.pan_number}</span>}
+                    </div>
+                    {(contextData.bank_name || contextData.bank_account_number || contextData.account_number) && (
+                      <div className="flex gap-3 text-[10px] text-slate-500 border-l border-slate-300 pl-3 ml-2">
+                        <div><span className="font-semibold text-slate-400">Bank:</span> {contextData.bank_name || "-"}</div>
+                        <div><span className="font-semibold text-slate-400">A/C:</span> {contextData.bank_account_number || contextData.account_number || "-"}</div>
+                        <div><span className="font-semibold text-slate-400">IFSC:</span> {contextData.ifsc_code || "-"}</div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

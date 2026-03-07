@@ -490,7 +490,7 @@ const BillList = () => {
                                 <th className="px-6 py-4">Date</th>
                                 <th className="px-6 py-4">Client</th>
                                 <th className="px-6 py-4 text-right">Amount</th>
-                                <th className="px-6 py-4 text-right">Balance</th>
+                                <th className="px-6 py-4 text-right">Due Balance</th>
                                 <th className="px-6 py-4 text-center">Status</th>
                                 <th className="px-6 py-4 text-center">Actions</th>
                             </tr>

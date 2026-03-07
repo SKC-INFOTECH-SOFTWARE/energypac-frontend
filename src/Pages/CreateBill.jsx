@@ -17,6 +17,8 @@ const CreateBill = () => {
     // Form State
     const [formData, setFormData] = useState({
         bill_date: new Date().toISOString().split("T")[0],
+        bill_type: "DOMESTIC",
+        freight_cost: 0,
         remarks: "",
         items: []
     });
@@ -44,7 +46,7 @@ const CreateBill = () => {
         const id = e.target.value;
         setSelectedWoId(id);
         setWoDetails(null);
-        setFormData(prev => ({ ...prev, items: [], remarks: "" }));
+        setFormData(prev => ({ ...prev, items: [], remarks: "", bill_type: "DOMESTIC", freight_cost: 0 }));
 
         if (!id) return;
 
@@ -189,6 +191,8 @@ const CreateBill = () => {
         const payload = {
             work_order: selectedWoId,
             bill_date: formData.bill_date,
+            bill_type: formData.bill_type,
+            freight_cost: parseFloat(formData.freight_cost || 0),
             remarks: formData.remarks,
             items: itemsToBill
         };
@@ -209,7 +213,7 @@ const CreateBill = () => {
                     // Reset and refresh
                     setSelectedWoId("");
                     setWoDetails(null);
-                    setFormData({ ...formData, items: [], remarks: "" });
+                    setFormData({ ...formData, items: [], remarks: "", bill_type: "DOMESTIC", freight_cost: 0 });
 
                     // Re-fetch WOs
                     const data = await getActiveWorkOrders(); // Using correct function directly for simplicity
@@ -287,6 +291,33 @@ const CreateBill = () => {
                                         required
                                         value={formData.bill_date}
                                         onChange={(e) => setFormData({ ...formData, bill_date: e.target.value })}
+                                        className="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none transition-all"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                        Bill Type
+                                    </label>
+                                    <select
+                                        value={formData.bill_type}
+                                        onChange={(e) => setFormData({ ...formData, bill_type: e.target.value })}
+                                        className="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none transition-all"
+                                    >
+                                        <option value="DOMESTIC">DOMESTIC</option>
+                                        <option value="INTERNATIONAL">INTERNATIONAL</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                        Freight Cost
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={formData.freight_cost}
+                                        onChange={(e) => setFormData({ ...formData, freight_cost: e.target.value })}
+                                        placeholder="0.00"
                                         className="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none transition-all"
                                     />
                                 </div>

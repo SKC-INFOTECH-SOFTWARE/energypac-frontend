@@ -12,7 +12,7 @@ export const createRequisition = (data) =>
   axiosSecure.post("/api/requisitions", data);
 
 export const updateRequisition = (id, data) =>
-  axiosSecure.put(`/api/requisitions/${id}`, data);
+  axiosSecure.patch(`/api/requisitions/${id}`, data);
 
 export const deleteRequisition = (id) =>
   axiosSecure.delete(`/api/requisitions/${id}`);

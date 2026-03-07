@@ -6,7 +6,6 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { FaPlus, FaSearch, FaEye, FaEdit, FaPaperPlane, FaCheck, FaFileExcel, FaTimes } from "react-icons/fa";
 import ClientQuotationModal from "../components/sales/ClientQuotationModal";
-import UpdateGstModal from "../components/sales/UpdateGstModal";
 import ClientQuotationDetailsModal from "../components/sales/ClientQuotationDetailsModal";
 import ProductSelector from "../components/common/ProductSelector";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
@@ -22,8 +21,6 @@ const ClientQuotation = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // GST Modal State
-    const [gstModalOpen, setGstModalOpen] = useState(false);
     const [selectedQuotation, setSelectedQuotation] = useState(null);
 
     // View Modal State
@@ -426,10 +423,10 @@ const ClientQuotation = () => {
                                                 <button
                                                     onClick={() => {
                                                         setSelectedQuotation(item);
-                                                        setGstModalOpen(true);
+                                                        setIsModalOpen(true);
                                                     }}
                                                     className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                                                    title="Update GST"
+                                                    title="Edit Quotation"
                                                     disabled={item.status !== 'DRAFT'}
                                                 >
                                                     <FaEdit />
@@ -499,24 +496,18 @@ const ClientQuotation = () => {
             {/* MODAL */}
             <ClientQuotationModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSuccess={() => {
-                    fetchQuotations(currentPage, searchText, statusFilter);
-                }}
-            />
-
-            {/* GST MODAL */}
-            <UpdateGstModal
-                isOpen={gstModalOpen}
                 onClose={() => {
-                    setGstModalOpen(false);
+                    setIsModalOpen(false);
                     setSelectedQuotation(null);
                 }}
-                quotation={selectedQuotation}
-                onSuccess={() => {
+                onSuccess={(msg) => {
                     fetchQuotations(currentPage, searchText, statusFilter);
+                    setAlert({ open: true, type: "success", message: msg || "Quotation operation successful" });
                 }}
+                quotation={selectedQuotation}
             />
+
+
 
 
             {/* DETAILS MODAL */}

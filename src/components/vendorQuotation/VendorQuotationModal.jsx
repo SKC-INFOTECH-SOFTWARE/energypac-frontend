@@ -97,6 +97,35 @@ const VendorQuotationModal = ({ open, onClose, onSuccess, requisitionId, vendorI
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Vendor Details Snippet */}
+          {items.length > 0 && items[0].vendor_name && (
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-wrap gap-6 items-start">
+              <div className="space-y-1">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Vendor</span>
+                <div className="font-bold text-slate-800">{items[0].vendor_name}</div>
+                <div className="text-xs text-slate-500 font-mono">{items[0].vendor_code}</div>
+              </div>
+              <div className="space-y-1">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Tax Info</span>
+                <div className="flex gap-2 text-xs">
+                  {items[0].gst_number && <span className="bg-white px-2 py-0.5 rounded border border-slate-200 font-bold text-blue-600">GST: {items[0].gst_number}</span>}
+                  {items[0].pan_number && <span className="bg-white px-2 py-0.5 rounded border border-slate-200 font-bold text-slate-600">PAN: {items[0].pan_number}</span>}
+                </div>
+              </div>
+              {(items[0].bank_name || items[0].bank_account_number || items[0].account_number || items[0].account_name) && (
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Bank Details</span>
+                  <div className="text-xs text-slate-600 leading-tight">
+                    <div><span className="text-slate-400">Bank:</span> {items[0].bank_name || "-"}</div>
+                    <div><span className="text-slate-400">Name:</span> {items[0].account_name || "-"}</div>
+                    <div className="font-mono"><span className="text-slate-400">A/C:</span> {items[0].bank_account_number || items[0].account_number || "-"}</div>
+                    <div><span className="text-slate-400">IFSC:</span> {items[0].ifsc_code || "-"}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3">
               <HiInformationCircle className="text-xl shrink-0" />

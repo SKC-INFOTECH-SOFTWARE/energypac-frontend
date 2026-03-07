@@ -131,8 +131,17 @@ const RequisitionFlow = ({ requisitionId: propRequisitionId }) => {
                                                     <div className="font-mono text-sm text-slate-600 bg-slate-100 px-1 rounded w-fit mb-1 border border-slate-200">
                                                         {vendor.vendor_code}
                                                     </div>
-                                                    <div className="text-sm text-slate-600 leading-tight">
-                                                        {vendor.gst_number && <div>GST: {vendor.gst_number}</div>}
+                                                    <div className="text-[11px] text-slate-600 leading-tight space-y-0.5">
+                                                        {vendor.gst_number && <div className="font-bold text-blue-600">GST: {vendor.gst_number}</div>}
+                                                        {vendor.pan_number && <div className="font-bold text-slate-500">PAN: {vendor.pan_number}</div>}
+                                                        {(vendor.bank_account_number || vendor.account_number || vendor.bank_name) && (
+                                                            <div className="mt-1 text-slate-800 text-[10px] space-y-0.5 border-t border-slate-200 pt-1">
+                                                                <div><span className="text-slate-500">Bank:</span> {vendor.bank_name || "-"}</div>
+                                                                <div><span className="text-slate-500">Name:</span> {vendor.account_name || "-"}</div>
+                                                                <div><span className="text-slate-500">A/C:</span> {vendor.bank_account_number || vendor.account_number || "-"}</div>
+                                                                <div><span className="text-slate-500">IFSC:</span> {vendor.ifsc_code || "-"}</div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </td>
 

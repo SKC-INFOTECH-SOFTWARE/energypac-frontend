@@ -25,6 +25,9 @@ const QuotationComparison = () => {
     const [generating, setGenerating] = useState(false);
     const [downloading, setDownloading] = useState(false);
 
+    // State for per-vendor Freight Costs { vendorId: cost }
+    const [freightCosts, setFreightCosts] = useState({});
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -65,6 +68,13 @@ const QuotationComparison = () => {
         });
     };
 
+    const handleFreightChange = (vendorId, value) => {
+        setFreightCosts(prev => ({
+            ...prev,
+            [vendorId]: parseFloat(value) || 0
+        }));
+    };
+
     const handleGenerateClick = () => {
         const itemIds = Object.values(selectedItems);
 
@@ -89,8 +99,14 @@ const QuotationComparison = () => {
         const payload = {
             requisition: selectedRequisition,
             po_date: poDate,
-            selections: itemIds
+            selections: itemIds,
+            freight_costs: Object.keys(freightCosts).map(vendor_id => ({
+                vendor_id,
+                freight_cost: Number(freightCosts[vendor_id])
+            })).filter(f => f.freight_cost > 0)
         };
+
+        console.log("Generating PO with payload:", payload);
 
         try {
             await generatePOFromComparison(payload);
@@ -309,11 +325,12 @@ const QuotationComparison = () => {
 
                                     {/* DYNAMIC VENDOR COLUMNS */}
                                     {/* Assume each vendor might have multiple quotations, we flatten them */}
-                                    {data.vendors.map((vendor, vIdx) => (
-                                        vendor.quotations.map((q, qIdx) => (
-                                            <th key={`${vIdx}-${qIdx}`} className="px-4 py-3 min-w-55 border-r border-slate-300 bg-slate-50/50">
+                                    {data.vendors.map((vendor, vIdx) => {
+                                        console.log("VENDOR DATA STRUCTURE:", vendor);
+                                        return vendor.quotations.map((q, qIdx) => (
+                                            <th key={`${vIdx}-${qIdx}`} className="px-4 py-3 min-w-55 border-r border-slate-300 bg-slate-50/50 align-top">
                                                 <div className="flex flex-col gap-2">
-                                                    <div>
+                                                    <div className="w-full">
                                                         <div className="font-bold text-slate-800 text-sm truncate max-w-50" title={vendor.vendor_name}>
                                                             {vendor.vendor_name}
                                                         </div>
@@ -321,11 +338,44 @@ const QuotationComparison = () => {
                                                             <span>{vendor.vendor_code}</span>
                                                             <span className="bg-white px-1 rounded border border-slate-300">{q.quotation_number}</span>
                                                         </div>
+                                                        <div className="flex gap-2 text-[9px] mt-1 mb-1">
+                                                            {vendor.gst_number && (
+                                                                <span className="text-blue-600 font-bold bg-blue-50 px-1 rounded border border-blue-100">GST: {vendor.gst_number}</span>
+                                                            )}
+                                                            {vendor.pan_number && (
+                                                                <span className="text-slate-600 font-bold bg-slate-50 px-1 rounded border border-slate-200">PAN: {vendor.pan_number}</span>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Bank Details Snippet */}
+                                                        {(vendor.bank_name || vendor.bank_account_number || vendor.account_name) && (
+                                                            <div className="bg-white p-1.5 rounded border border-slate-200 mt-2 shadow-sm text-left">
+                                                                <p className="text-[9px] font-bold text-slate-600 mb-0.5 border-b border-slate-100 pb-0.5">Bank Info</p>
+                                                                <div className="text-[9px] text-slate-500 leading-tight space-y-0.5">
+                                                                    <div className="flex justify-between gap-1">
+                                                                        <span className="text-slate-400 shrink-0">Bank:</span>
+                                                                        <span className="font-medium text-slate-700 truncate" title={vendor.bank_name}>{vendor.bank_name || '-'}</span>
+                                                                    </div>
+                                                                    <div className="flex justify-between gap-1">
+                                                                        <span className="text-slate-400 shrink-0">Name:</span>
+                                                                        <span className="font-medium text-slate-700 truncate" title={vendor.account_name}>{vendor.account_name || '-'}</span>
+                                                                    </div>
+                                                                    <div className="flex justify-between gap-1">
+                                                                        <span className="text-slate-400 shrink-0">A/C:</span>
+                                                                        <span className="font-medium text-slate-700 truncate">{vendor.bank_account_number || vendor.account_number || '-'}</span>
+                                                                    </div>
+                                                                    <div className="flex justify-between gap-1">
+                                                                        <span className="text-slate-400 shrink-0">IFSC:</span>
+                                                                        <span className="font-medium text-slate-700 truncate">{vendor.ifsc_code || '-'}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </th>
                                         ))
-                                    ))}
+                                    })}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-300 text-sm text-slate-700">
@@ -372,7 +422,7 @@ const QuotationComparison = () => {
                                                                     <input
                                                                         type="checkbox"
                                                                         name={`product-${product.code}`}
-                                                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                                                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                                                                         checked={selectedItems[product.code] === matchedItem.id}
                                                                         onChange={() => handleItemSelect(product.code, matchedItem.id)}
                                                                     />
@@ -396,6 +446,63 @@ const QuotationComparison = () => {
                                         ))}
                                     </tr>
                                 ))}
+
+
+                                {/* FREIGHT COST ROW */}
+                                <tr className="bg-slate-50 font-medium border-b border-slate-300">
+                                    <td className="sticky left-0 z-20 bg-slate-50 px-4 py-3 border-r border-slate-400 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] text-slate-800">
+                                        Manual Freight Cost
+                                    </td>
+                                    {data.vendors.map((vendor) => {
+                                        // Attempt multiple possible keys sent by backend for vendor identifier
+                                        const actualVendorId = vendor.vendor_id || vendor.id || vendor.vendor_uuid || vendor.vendor || vendor.uuid ||
+                                            (vendor.quotations?.length > 0 ? (vendor.quotations[0].vendor_id || vendor.quotations[0].vendor || vendor.quotations[0].vendor_profile) : undefined);
+
+                                        return vendor.quotations.map((q, idx) => (
+                                            <td key={`freight-${actualVendorId}-${idx}`} className="px-4 py-3 border-r border-slate-300 bg-slate-50/50">
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    placeholder="0.00"
+                                                    className="w-full text-right bg-white border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                                    value={freightCosts[actualVendorId] || ''}
+                                                    onChange={(e) => handleFreightChange(actualVendorId, e.target.value)}
+                                                />
+                                            </td>
+                                        ));
+                                    })}
+                                </tr>
+                                {/* TOTAL COMPUTED ROW */}
+                                <tr className="bg-slate-100 font-bold border-t-2 border-slate-400">
+                                    <td className="sticky left-0 z-20 bg-slate-100 px-4 py-4 border-r border-slate-400 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] text-slate-900">
+                                        Estimated PO Total (with freight)
+                                    </td>
+                                    {data.vendors.map((vendor) => {
+                                        // Attempt multiple possible keys sent by backend for vendor identifier
+                                        const actualVendorId = vendor.vendor_id || vendor.id || vendor.vendor_uuid || vendor.vendor || vendor.uuid ||
+                                            (vendor.quotations?.length > 0 ? (vendor.quotations[0].vendor_id || vendor.quotations[0].vendor || vendor.quotations[0].vendor_profile) : undefined);
+
+                                        return vendor.quotations.map((q, idx) => {
+                                            // Calculate total selected amount for this quotation
+                                            const selectedTotal = q.items
+                                                .filter(i => selectedItems[i.product_code] === i.id)
+                                                .reduce((sum, i) => sum + Number(i.amount), 0);
+
+                                            const freight = freightCosts[actualVendorId] || 0;
+                                            const grandTotal = selectedTotal + freight;
+
+                                            return (
+                                                <td key={`est-total-${idx}`} className="px-4 py-4 text-right border-r border-slate-300 text-blue-700 bg-slate-100/80">
+                                                    {selectedTotal > 0 ? (
+                                                        `₹ ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+                                                    ) : (
+                                                        <span className="text-slate-400">-</span>
+                                                    )}
+                                                </td>
+                                            );
+                                        });
+                                    })}
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -425,7 +532,8 @@ const QuotationComparison = () => {
                         </button>
                     </div>
                 </div>
-            )}
+            )
+            }
 
             <ConfirmDialog
                 open={showConfirm}
@@ -446,7 +554,7 @@ const QuotationComparison = () => {
                 message={toast.message}
                 onClose={() => setToast({ ...toast, open: false })}
             />
-        </div>
+        </div >
     );
 };
 

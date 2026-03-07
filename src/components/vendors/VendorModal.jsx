@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { createVendor, updateVendor } from "../../services/vendorService";
 import AlertToast from "../ui/AlertToast";
+import { FaTimes } from "react-icons/fa";
 
 const initialState = {
-    vendor_code: "",
     vendor_name: "",
     contact_person: "",
     phone: "",
@@ -11,6 +11,12 @@ const initialState = {
     address: "",
     gst_number: "",
     pan_number: "",
+    bank_name: "",
+    account_name: "",
+    bank_account_number: "",
+    confirm_account_number: "",
+    ifsc_code: "",
+    swift_code: "",
 };
 
 export default function VendorModal({
@@ -28,7 +34,6 @@ export default function VendorModal({
     useEffect(() => {
         if (mode === "edit" && vendor) {
             setForm({
-                vendor_code: vendor.vendor_code || "",
                 vendor_name: vendor.vendor_name || "",
                 contact_person: vendor.contact_person || "",
                 phone: vendor.phone || "",
@@ -36,6 +41,12 @@ export default function VendorModal({
                 address: vendor.address || "",
                 gst_number: vendor.gst_number || "",
                 pan_number: vendor.pan_number || "",
+                bank_name: vendor.bank_name || "",
+                account_name: vendor.account_name || "",
+                bank_account_number: vendor.bank_account_number || "",
+                confirm_account_number: vendor.bank_account_number || "",
+                ifsc_code: vendor.ifsc_code || "",
+                swift_code: vendor.swift_code || "",
             });
         } else {
             setForm(initialState);
@@ -52,7 +63,7 @@ export default function VendorModal({
         if (name === "phone") {
             // Only digits allowed
             value = value.replace(/\D/g, "");
-        } else if (["gst_number", "pan_number", "vendor_code"].includes(name)) {
+        } else if (["gst_number", "pan_number", "ifsc_code", "swift_code"].includes(name)) {
             // Force Uppercase
             value = value.toUpperCase();
         }
@@ -69,10 +80,7 @@ export default function VendorModal({
         let newErrors = {};
         let isValid = true;
 
-        if (!form.vendor_code.trim()) {
-            newErrors.vendor_code = "Vendor Code is required";
-            isValid = false;
-        }
+
 
         if (!form.vendor_name.trim()) {
             newErrors.vendor_name = "Vendor Name is required";
@@ -99,6 +107,31 @@ export default function VendorModal({
             isValid = false;
         }
 
+        if (!form.bank_name.trim()) {
+            newErrors.bank_name = "Bank Name is required";
+            isValid = false;
+        }
+
+        if (!form.account_name.trim()) {
+            newErrors.account_name = "Account Name is required";
+            isValid = false;
+        }
+
+        if (!form.bank_account_number.trim()) {
+            newErrors.bank_account_number = "Bank Account Number is required";
+            isValid = false;
+        }
+
+        if (form.bank_account_number !== form.confirm_account_number) {
+            newErrors.confirm_account_number = "Account numbers do not match";
+            isValid = false;
+        }
+
+        if (!form.ifsc_code.trim()) {
+            newErrors.ifsc_code = "IFSC Code is required";
+            isValid = false;
+        }
+
         setErrors(newErrors);
         return isValid;
     };
@@ -113,10 +146,13 @@ export default function VendorModal({
         try {
             setLoading(true);
 
+            // Exclude confirm_account_number from the payload
+            const { confirm_account_number, ...payload } = form;
+
             if (mode === "edit") {
-                await updateVendor(vendor.id, form);
+                await updateVendor(vendor.id, payload);
             } else {
-                await createVendor(form);
+                await createVendor(payload);
             }
 
 
@@ -131,119 +167,191 @@ export default function VendorModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center backdrop-blur-sm">
-            <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl p-8 animate-in fade-in zoom-in-95 duration-200">
-                <h2 className="text-xl font-bold text-slate-800 mb-6 border-b border-slate-100 pb-4">
-                    {mode === "edit" ? "Edit Vendor" : "Add Vendor"}
-                </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+            <div className="bg-white w-full max-w-5xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+                {/* Header */}
+                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
+                    <h2 className="text-xl font-bold text-slate-800">
+                        {mode === "edit" ? "Edit Vendor" : "Add Vendor"}
+                    </h2>
+                    <button type="button" onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-white rounded-full transition-all">
+                        <FaTimes />
+                    </button>
+                </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="grid grid-cols-2 gap-5">
+                {/* Body */}
+                <div className="flex-1 overflow-y-auto p-6">
+                    <form id="vendor-form" onSubmit={handleSubmit} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div>
+                                <label className="label">Vendor Name <span className="text-red-500">*</span></label>
+                                <input
+                                    className={`input ${errors.vendor_name ? "border-red-500 focus:ring-red-200" : ""}`}
+                                    name="vendor_name"
+                                    value={form.vendor_name}
+                                    onChange={handleChange}
+                                />
+                                {errors.vendor_name && <p className="text-xs text-red-500 mt-1">{errors.vendor_name}</p>}
+                            </div>
+
+                            <div>
+                                <label className="label">Contact Person</label>
+                                <input className="input" name="contact_person" value={form.contact_person} onChange={handleChange} />
+                            </div>
+
+                            <div>
+                                <label className="label">Phone</label>
+                                <input
+                                    className={`input ${errors.phone ? "border-red-500 focus:ring-red-200" : ""}`}
+                                    name="phone"
+                                    value={form.phone}
+                                    onChange={handleChange}
+                                    placeholder="Enter phone number"
+                                    type="number"
+                                />
+                                {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
+                            </div>
+
+                            <div>
+                                <label className="label">Email</label>
+                                <input
+                                    className={`input ${errors.email ? "border-red-500 focus:ring-red-200" : ""}`}
+                                    name="email"
+                                    value={form.email}
+                                    onChange={handleChange}
+                                    placeholder="example@domain.com"
+                                />
+                                {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+                            </div>
+
+                            <div>
+                                <label className="label">GST Number</label>
+                                <input
+                                    className={`input ${errors.gst_number ? "border-red-500 focus:ring-red-200" : ""}`}
+                                    name="gst_number"
+                                    value={form.gst_number}
+                                    onChange={handleChange}
+                                    placeholder="15 alphanumeric characters"
+                                />
+                                {errors.gst_number && <p className="text-xs text-red-500 mt-1">{errors.gst_number}</p>}
+                            </div>
+
+                            <div>
+                                <label className="label">PAN Number</label>
+                                <input
+                                    className={`input ${errors.pan_number ? "border-red-500 focus:ring-red-200" : ""}`}
+                                    name="pan_number"
+                                    value={form.pan_number}
+                                    onChange={handleChange}
+                                    placeholder="10 alphanumeric characters"
+                                />
+                                {errors.pan_number && <p className="text-xs text-red-500 mt-1">{errors.pan_number}</p>}
+                            </div>
+                        </div>
+
                         <div>
-                            <label className="label">Vendor Code <span className="text-red-500">*</span></label>
-                            <input
-                                className={`input ${errors.vendor_code ? "border-red-500 focus:ring-red-200" : ""}`}
-                                name="vendor_code"
-                                value={form.vendor_code}
+                            <label className="label">Address</label>
+                            <textarea
+                                className="input w-full"
+                                name="address"
+                                value={form.address}
                                 onChange={handleChange}
+                                rows={3}
                             />
-                            {errors.vendor_code && <p className="text-xs text-red-500 mt-1">{errors.vendor_code}</p>}
                         </div>
 
-                        <div>
-                            <label className="label">Vendor Name <span className="text-red-500">*</span></label>
-                            <input
-                                className={`input ${errors.vendor_name ? "border-red-500 focus:ring-red-200" : ""}`}
-                                name="vendor_name"
-                                value={form.vendor_name}
-                                onChange={handleChange}
-                            />
-                            {errors.vendor_name && <p className="text-xs text-red-500 mt-1">{errors.vendor_name}</p>}
+                        <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                            <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Bank Details</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                                <div>
+                                    <label className="label">Bank Name <span className="text-red-500">*</span></label>
+                                    <input
+                                        className={`input ${errors.bank_name ? "border-red-500 focus:ring-red-200" : ""}`}
+                                        name="bank_name"
+                                        value={form.bank_name}
+                                        onChange={handleChange}
+                                    />
+                                    {errors.bank_name && <p className="text-xs text-red-500 mt-1">{errors.bank_name}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="label">Account Holder Name <span className="text-red-500">*</span></label>
+                                    <input
+                                        className={`input ${errors.account_name ? "border-red-500 focus:ring-red-200" : ""}`}
+                                        name="account_name"
+                                        value={form.account_name}
+                                        onChange={handleChange}
+                                    />
+                                    {errors.account_name && <p className="text-xs text-red-500 mt-1">{errors.account_name}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="label">IFSC Code <span className="text-red-500">*</span></label>
+                                    <input
+                                        className={`input ${errors.ifsc_code ? "border-red-500 focus:ring-red-200" : ""}`}
+                                        name="ifsc_code"
+                                        value={form.ifsc_code}
+                                        onChange={handleChange}
+                                    />
+                                    {errors.ifsc_code && <p className="text-xs text-red-500 mt-1">{errors.ifsc_code}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="label">Bank Account Number <span className="text-red-500">*</span></label>
+                                    <input
+                                        className={`input ${errors.bank_account_number ? "border-red-500 focus:ring-red-200" : ""}`}
+                                        name="bank_account_number"
+                                        value={form.bank_account_number}
+                                        onChange={handleChange}
+                                        type="number"
+                                    />
+                                    {errors.bank_account_number && <p className="text-xs text-red-500 mt-1">{errors.bank_account_number}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="label">Confirm Account Number <span className="text-red-500">*</span></label>
+                                    <input
+                                        className={`input ${errors.confirm_account_number ? "border-red-500 focus:ring-red-200" : ""}`}
+                                        name="confirm_account_number"
+                                        value={form.confirm_account_number}
+                                        onChange={handleChange}
+                                        type="number"
+                                    />
+                                    {errors.confirm_account_number && <p className="text-xs text-red-500 mt-1">{errors.confirm_account_number}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="label">Swift Code</label>
+                                    <input
+                                        className="input"
+                                        name="swift_code"
+                                        value={form.swift_code}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
                         </div>
+                    </form>
+                </div>
 
-                        <div>
-                            <label className="label">Contact Person</label>
-                            <input className="input" name="contact_person" value={form.contact_person} onChange={handleChange} />
-                        </div>
-
-                        <div>
-                            <label className="label">Phone</label>
-                            <input
-                                className={`input ${errors.phone ? "border-red-500 focus:ring-red-200" : ""}`}
-                                name="phone"
-                                value={form.phone}
-                                onChange={handleChange}
-                                placeholder="10 digit mobile number"
-                            />
-                            {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
-                        </div>
-
-                        <div>
-                            <label className="label">Email</label>
-                            <input
-                                className={`input ${errors.email ? "border-red-500 focus:ring-red-200" : ""}`}
-                                name="email"
-                                value={form.email}
-                                onChange={handleChange}
-                                placeholder="example@domain.com"
-                            />
-                            {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
-                        </div>
-
-                        <div>
-                            <label className="label">GST Number</label>
-                            <input
-                                className={`input ${errors.gst_number ? "border-red-500 focus:ring-red-200" : ""}`}
-                                name="gst_number"
-                                value={form.gst_number}
-                                onChange={handleChange}
-                                placeholder="15 alphanumeric characters"
-                            />
-                            {errors.gst_number && <p className="text-xs text-red-500 mt-1">{errors.gst_number}</p>}
-                        </div>
-
-                        <div>
-                            <label className="label">PAN Number</label>
-                            <input
-                                className={`input ${errors.pan_number ? "border-red-500 focus:ring-red-200" : ""}`}
-                                name="pan_number"
-                                value={form.pan_number}
-                                onChange={handleChange}
-                                placeholder="10 alphanumeric characters"
-                            />
-                            {errors.pan_number && <p className="text-xs text-red-500 mt-1">{errors.pan_number}</p>}
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="label">Address</label>
-                        <textarea
-                            className="input w-full"
-                            name="address"
-                            value={form.address}
-                            onChange={handleChange}
-                            rows={3}
-                        />
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-5 py-2 text-sm font-semibold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
-                        >
-                            Cancel
-                        </button>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="px-5 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-60 transition-colors shadow-sm"
-                        >
-                            {loading ? "Saving..." : "Save Vendor"}
-                        </button>
-                    </div>
-                </form>
+                {/* Footer */}
+                <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3 rounded-b-2xl">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-5 py-2 text-sm font-semibold rounded-lg border border-slate-300 text-slate-700 hover:bg-white transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        form="vendor-form"
+                        disabled={loading}
+                        className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 shadow-md hover:shadow-lg transition-all"
+                    >
+                        {loading ? "Saving..." : "Save Vendor"}
+                    </button>
+                </div>
 
                 <AlertToast
                     open={toast.open}

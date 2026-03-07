@@ -86,10 +86,12 @@ const VendorViewModal = ({ open, onClose, data, loading }) => {
                                         <DetailItem label="PAN Number" value={data.pan_number} icon={<FaIdCard className="text-slate-400" />} />
                                         <div className="pt-2">
                                             <p className="text-xs font-semibold text-slate-500 mb-1">Bank Account</p>
-                                            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 text-sm">
-                                                <p><span className="text-slate-500 text-xs">Bank:</span> <span className="font-medium text-slate-800">{data.bank_name || "-"}</span></p>
-                                                <p><span className="text-slate-500 text-xs">A/C:</span> <span className="font-mono text-slate-800">{data.bank_account_number || "-"}</span></p>
-                                                <p><span className="text-slate-500 text-xs">IFSC:</span> <span className="font-mono text-slate-800">{data.ifsc_code || "-"}</span></p>
+                                            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 text-sm space-y-1">
+                                                <p><span className="text-slate-500 text-xs inline-block w-14">Bank:</span> <span className="font-medium text-slate-800">{data.bank_name || "-"}</span></p>
+                                                <p><span className="text-slate-500 text-xs inline-block w-14">Name:</span> <span className="font-medium text-slate-800">{data.account_name || "-"}</span></p>
+                                                <p><span className="text-slate-500 text-xs inline-block w-14">A/C:</span> <span className="font-mono text-slate-800">{data.bank_account_number || "-"}</span></p>
+                                                <p><span className="text-slate-500 text-xs inline-block w-14">IFSC:</span> <span className="font-mono text-slate-800">{data.ifsc_code || "-"}</span></p>
+                                                <p><span className="text-slate-500 text-xs inline-block w-14">SWIFT:</span> <span className="font-mono text-slate-800">{data.swift_code || "-"}</span></p>
                                             </div>
                                         </div>
                                     </div>

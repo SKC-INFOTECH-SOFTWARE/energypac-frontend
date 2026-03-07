@@ -76,6 +76,10 @@ const BillPDF = ({ details }) => {
                             <Text style={styles.label}>WO Ref:</Text>
                             <Text style={styles.value}>{details.wo_number}</Text>
                         </View>
+                        <View style={styles.row}>
+                            <Text style={styles.label}>Type:</Text>
+                            <Text style={styles.value}>{details.bill_type || 'DOMESTIC'}</Text>
+                        </View>
                     </View>
                 </View>
 
@@ -154,6 +158,12 @@ const BillPDF = ({ details }) => {
                             <Text style={styles.companySub}>Advance Deducted</Text>
                             <Text style={styles.value}>{formatCurrency(details.advance_deducted)}</Text>
                         </View>
+                        {parseFloat(details.freight_cost) > 0 && (
+                            <View style={styles.totalRow}>
+                                <Text style={styles.companySub}>Freight Cost</Text>
+                                <Text style={styles.value}>{formatCurrency(details.freight_cost)}</Text>
+                            </View>
+                        )}
                         <View style={styles.totalRow}>
                             <Text style={[styles.companySub, { fontWeight: 'bold', color: '#1a56db' }]}>Net Payable</Text>
                             <Text style={[styles.value, { color: '#1a56db' }]}>{formatCurrency(details.net_payable)}</Text>

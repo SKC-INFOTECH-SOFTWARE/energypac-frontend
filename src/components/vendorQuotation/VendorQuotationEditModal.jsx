@@ -17,7 +17,7 @@ const VendorQuotationEditModal = ({ open, onClose, quotationId, onSuccess }) => 
             setData(null);
             setItems([]);
         }
-    }, [open, quotationId , ]);
+    }, [open, quotationId,]);
 
     const loadDetails = async () => {
         setLoading(true);
@@ -142,6 +142,21 @@ const VendorQuotationEditModal = ({ open, onClose, quotationId, onSuccess }) => 
                                                 <FaUserTie className="text-slate-400 w-4" />
                                                 <span className="font-semibold">Vendor:</span> {data.vendor_name}
                                                 <span className="text-xs bg-slate-100 px-1.5 rounded-md text-slate-500">{data.vendor_code}</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-xs">
+                                                {(data.gst_number || data?.vendor?.gst_number) && (
+                                                    <span className="font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">GST: {data.gst_number || data?.vendor?.gst_number}</span>
+                                                )}
+                                                {(data.pan_number || data?.vendor?.pan_number) && (
+                                                    <span className="font-bold text-slate-600 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">PAN: {data.pan_number || data?.vendor?.pan_number}</span>
+                                                )}
+                                                {(data.bank_name || data?.vendor?.bank_name || data.bank_account_number || data?.vendor?.bank_account_number || data?.account_number || data?.vendor?.account_number) && (
+                                                    <span className="text-slate-500 italic flex gap-2">
+                                                        <span>{data.bank_name || data?.vendor?.bank_name}</span> |
+                                                        <span>{data.bank_account_number || data?.vendor?.bank_account_number || data?.account_number || data?.vendor?.account_number}</span> |
+                                                        <span>{data.ifsc_code || data?.vendor?.ifsc_code}</span>
+                                                    </span>
+                                                )}
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <FaCalendarAlt className="text-slate-400 w-4" />

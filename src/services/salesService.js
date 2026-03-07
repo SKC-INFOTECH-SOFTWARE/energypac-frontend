@@ -80,6 +80,19 @@ export const createClientQuotation = async (payload) => {
     }
 };
 
+export const updateClientQuotation = async (id, payload) => {
+    try {
+        const response = await axiosSecure.patch(
+            `/api/sales/quotations/${id}`,
+            payload
+        );
+        return response.data;
+    } catch (error) {
+        console.error(`Error updating client quotation ${id}:`, error);
+        throw error;
+    }
+};
+
 export const updateClientQuotationGst = async (id, gstData) => {
     try {
         const response = await axiosSecure.post(

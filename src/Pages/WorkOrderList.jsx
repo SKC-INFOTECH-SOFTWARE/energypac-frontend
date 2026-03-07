@@ -17,7 +17,7 @@ const WorkOrderList = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
-    const [statusFilter, setStatusFilter] = useState("ACTIVE");
+    const [statusFilter, setStatusFilter] = useState("");
     const [next, setNext] = useState(null);
     const [previous, setPrevious] = useState(null);
     const [selectedWorkOrderId, setSelectedWorkOrderId] = useState(null);

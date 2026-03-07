@@ -297,9 +297,27 @@ const PurchaseOrderModal = ({ open, onClose, data, onShowAlert, onUpdate }) => {
                                             )}
                                         </tbody>
                                         <tfoot className="bg-slate-50 border-t border-slate-200 font-bold text-slate-800">
+                                            {poData.freight_cost > 0 && (
+                                                <>
+                                                    <tr>
+                                                        <td colSpan="4" className="px-4 py-2 text-right text-slate-500 font-medium">Sub Total:</td>
+                                                        <td className="px-4 py-2 text-right font-mono">
+                                                            ₹ {(parseFloat(poData.total_amount) - parseFloat(poData.freight_cost)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colSpan="4" className="px-4 py-2 text-right text-slate-500 font-medium">Freight Cost:</td>
+                                                        <td className="px-4 py-2 text-right font-mono">
+                                                            ₹ {parseFloat(poData.freight_cost).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                </>
+                                            )}
                                             <tr>
-                                                <td colSpan="4" className="px-4 py-3 text-right">Total Amount:</td>
-                                                <td className="px-4 py-3 text-right text-lg text-blue-600">
+                                                <td colSpan="4" className="px-4 py-3 text-right text-base">Total Amount:</td>
+                                                <td className="px-4 py-3 text-right text-lg text-blue-600 font-mono">
                                                     {parseFloat(poData.total_amount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}
                                                 </td>
                                                 <td></td>
